@@ -23,7 +23,7 @@ VERSION = None
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-    "chardet>=3.0",
+    "charset_normalizer>=3.0",
     "regex>=2018.11",
     "packaging>=23.0",
 ]
@@ -36,7 +36,6 @@ precommit_require = [
 # When these are changed, update clevercsv/_optional.py accordingly
 full_require = [
     *precommit_require,
-    "faust-cchardet>=2.1.18",
     "pandas>=1.0.0",
     "tabview>=1.4",
 ]

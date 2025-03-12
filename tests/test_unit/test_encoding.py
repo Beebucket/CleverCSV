@@ -74,7 +74,7 @@ class EncodingTestCase(unittest.TestCase):
             encoding = case.encoding
             with self.subTest(encoding=encoding):
                 tmpfname = self._build_file(table, encoding)
-                detected = get_encoding(tmpfname, try_cchardet=False)
+                detected = get_encoding(tmpfname)
                 self.assertEqual(encoding, detected)
 
     def test_encoding_cchardet(self) -> None:
@@ -89,7 +89,7 @@ class EncodingTestCase(unittest.TestCase):
             with self.subTest(encoding=encoding):
                 out_encoding = case.cchardet_encoding
                 tmpfname = self._build_file(table, encoding)
-                detected = get_encoding(tmpfname, try_cchardet=True)
+                detected = get_encoding(tmpfname)
                 self.assertEqual(out_encoding, detected)
 
 

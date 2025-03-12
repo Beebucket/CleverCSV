@@ -675,7 +675,7 @@ with open("{tmpfname}", "r", newline="", encoding="ASCII") as fp:
         encoding = "latin-1"
         tmpfname = self._build_file(table, dialect, encoding=encoding)
         self.assertIn(
-            get_encoding(tmpfname, try_cchardet=False),
+            get_encoding(tmpfname),
             {"Windows-1255", "ISO-8859-1"},
         )
         tmpfd, tmpoutname = tempfile.mkstemp(prefix="ccsv_", suffix=".csv")
@@ -692,7 +692,7 @@ with open("{tmpfname}", "r", newline="", encoding="ASCII") as fp:
         crlf = "\r\n"
         exp = crlf.join(["A,B,C", "é,è,à", "4,5,6", ""])
 
-        self.assertEqual("utf-8", get_encoding(tmpoutname, try_cchardet=False))
+        self.assertEqual("utf-8", get_encoding(tmpoutname))
         with open(tmpoutname, "r", newline="", encoding="utf-8") as fp:
             output = fp.read()
 

@@ -21,7 +21,7 @@ from typing import List
 from typing import Optional
 from typing import Tuple
 
-import chardet
+import charset_normalizer
 import termcolor
 
 import clevercsv
@@ -129,7 +129,7 @@ def run_test(
         enc = annotation["encoding"]
     else:
         with gzip.open(gz_filename, "rb") as fid:
-            enc = chardet.detect(fid.read())["encoding"]
+            enc = charset_normalizer.detect(fid.read())["encoding"]
 
     true_dialect = annotation["dialect"]
     dialect, error, method, runtime = run_with_timeout(

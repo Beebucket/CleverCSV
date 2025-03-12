@@ -2,8 +2,8 @@
 
 """Unit tests for encoding detection
 
-Note that we're not necessarily testing how accurate the chardet/cchardet
-libraries are. We're testing that our encoding detection function works.
+Note that we're not necessarily testing how accurate the charset_normalizer
+library is. We're testing that our encoding detection function works.
 
 Author: G.J.J. van den Burg
 License: See the LICENSE file.
@@ -21,7 +21,6 @@ from dataclasses import dataclass
 from typing import Any
 from typing import List
 
-from clevercsv._optional import import_optional_dependency
 from clevercsv._types import AnyPath
 from clevercsv.encoding import get_encoding
 from clevercsv.write import writer
@@ -36,30 +35,24 @@ class EncodingTestCase(unittest.TestCase):
         # Source encoding to use when writing
         source_encoding: str
 
-        # Acceptable expected encodings from chardet
-        chardet_encodings: set[str]
-
-        # Acceptable expected encodings from cchardet
-        cchardet_encodings: set[str]
+        # Acceptable encodings charset_normalizer may report
+        expected_encodings: set[str]
 
     cases: List[Instance] = [
         Instance(
             table=[["Å", "B", "C"], [1, 2, 3], [4, 5, 6]],
             source_encoding="ISO-8859-1",
-            chardet_encodings={"ISO-8859-1", "KOI8-R"},
-            cchardet_encodings={"WINDOWS-1252"},
+            expected_encodings={"ISO-8859-1", "KOI8-R"},
         ),
         Instance(
             table=[["A", "B", "C"], [1, 2, 3], [4, 5, 6]],
             source_encoding="ascii",
-            chardet_encodings={"ascii"},
-            cchardet_encodings={"ASCII"},
+            expected_encodings={"ascii"},
         ),
         Instance(
             table=[["亜唖", "娃阿", "哀愛"], [1, 2, 3], ["挨", "姶", "葵"]],
             source_encoding="ISO-2022-JP",
-            chardet_encodings={"ISO-2022-JP"},
-            cchardet_encodings={"ISO-2022-JP"},
+            expected_encodings={"ISO-2022-JP"},
         ),
     ]
 
@@ -82,27 +75,12 @@ class EncodingTestCase(unittest.TestCase):
         self._tmpfiles.append(tmpfname)
         return tmpfname
 
-    def test_encoding_chardet(self) -> None:
+    def test_encoding(self) -> None:
         for case in self.cases:
             with self.subTest(encoding=case.source_encoding):
                 tmpfname = self._build_file(case.table, case.source_encoding)
-                detected = get_encoding(tmpfname, try_cchardet=False)
-                self.assertIn(detected, case.chardet_encodings)
-
-    def test_encoding_cchardet(self) -> None:
-        try:
-            _ = import_optional_dependency("cchardet")
-        except ImportError:
-            self.skipTest("Failed to import cchardet, skipping this test")
-
-        for case in self.cases:
-            with self.subTest(encoding=case.source_encoding):
-                tmpfname = self._build_file(case.table, case.source_encoding)
-                detected = get_encoding(tmpfname, try_cchardet=True)
-                self.assertIn(
-                    detected,
-                    case.cchardet_encodings,
-                )
+                detected = get_encoding(tmpfname)
+                self.assertIn(detected, case.expected_encodings)
 
 
 if __name__ == "__main__":

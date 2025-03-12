@@ -17,23 +17,14 @@ import os
 import time
 import unicodedata
 
-import chardet
+import charset_normalizer
 import libtmux
 
 
 def get_encoding(filename):
-    detector = chardet.UniversalDetector()
-    final_chunk = False
-    blk_size = 65536
     with open(filename, "rb") as fid:
-        while (not final_chunk) and (not detector.done):
-            chunk = fid.read(blk_size)
-            if len(chunk) < blk_size:
-                final_chunk = True
-            detector.feed(chunk)
-    detector.close()
-    encoding = detector.result.get("encoding", None)
-    return encoding
+        best = charset_normalizer.from_fp(fid).best()
+    return best.encoding if best else None
 
 
 def load_file(filename, encoding="unknown"):
@@ -136,7 +127,7 @@ class Asker(object):
         self.data = load_file(self.filename, encoding=self.encoding)
 
     def ask_question(
-        self, prompt, key, options=None, highlight_char=None, max_length=1
+            self, prompt, key, options=None, highlight_char=None, max_length=1
     ):
         if not self.opened_vim and not self.opened_less:
             self.open_less()

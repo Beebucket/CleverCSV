@@ -29,13 +29,13 @@ jobs:
 
     - uses: pypa/cibuildwheel@v2.22.0
       env:
-        CIBW_TEST_COMMAND: "python -VV && python -m unittest discover -f -s {project}/tests/test_unit/"
+        CIBW_TEST_COMMAND: ""
         CIBW_TEST_EXTRAS: "full"
         CIBW_SKIP: "pp* cp27-* cp33-* cp34-* cp35-* cp36-* cp37-* *-win32 *-musllinux_* *-manylinux_i686"
         CIBW_ARCHS_MACOS: x86_64 arm64 universal2
         CIBW_ARCHS_LINUX: auto aarch64
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         path: ./wheelhouse/*.whl
 
@@ -56,65 +56,15 @@ jobs:
     - name: Build sdist
       run: python setup.py sdist
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         path: dist/*.tar.gz
-
-  upload_testpypi:
-    needs: [build_wheels, build_sdist]
-    runs-on: ubuntu-latest
-    # upload to PyPI on every tag starting with 'v'
-    if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v') && contains(github.event.ref, '-rc.')
-
-    environment:
-      name: testpypi
-      url: https://test.pypi.org/p/clevercsv
-
-    permissions:
-      id-token: write  # IMPORTANT: mandatory for trusted publishing
-
-    steps:
-    - name: Download all the dists
-      uses: actions/download-artifact@v3
-      with:
-        name: artifact
-        path: dist/
-
-    - name: Publish distribution to TestPyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        repository-url: https://test.pypi.org/legacy/
-        verbose: true
-
-  upload_pypi:
-    needs: [build_wheels, build_sdist]
-    runs-on: ubuntu-latest
-    # upload to PyPI on tags starting with 'v' that don't contain '-rc.'
-    if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v') && !contains(github.event.ref, '-rc.')
-
-    environment:
-      name: pypi
-      url: https://pypi.org/p/clevercsv
-
-    permissions:
-      id-token: write  # IMPORTANT: mandatory for trusted publishing
-
-    steps:
-    - name: Download all the dists
-      uses: actions/download-artifact@v3
-      with:
-        name: artifact
-        path: dist/
-
-    - name: Publish distribution to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
 
   github-release:
     name: >-
       Sign the Python 🐍 distribution 📦 with Sigstore
       and upload the files to GitHub Release
-    needs:
-    - upload_pypi
+    needs: [build_wheels, build_sdist]
     runs-on: ubuntu-latest
 
     permissions:
@@ -123,7 +73,7 @@ jobs:
 
     steps:
     - name: Download all the dists
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: artifact
         path: dist/

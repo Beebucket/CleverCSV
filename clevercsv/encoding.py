@@ -18,8 +18,8 @@ from ._types import _OpenFile
 def get_encoding(filename: _OpenFile) -> Optional[str]:
     """Get the encoding of the file
 
-    This function uses the chardet package for detecting the encoding of a
-    file.
+    This function uses the charset_normalizer package for detecting the
+    encoding of a file.
 
     Parameters
     ----------
